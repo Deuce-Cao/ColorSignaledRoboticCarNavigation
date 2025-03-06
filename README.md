@@ -55,14 +55,14 @@ ColorSignaledRoboticCarNavigation/
 ├── docs/
 │   └── Advanced Robotics Proposal.docx
 ├── lib/
-│   └── README.me
+│   └── README.md
 ├── src/
 │   ├── Arduino/
 │   │   └── main.ino
 │   └── ESP32_CAM/
 │       └── main.cpp
 └── test/
-│   └── README.me
+    └── README.md
 ```
 
 ## Risks & Challenges
@@ -75,7 +75,7 @@ ColorSignaledRoboticCarNavigation/
 
 
 ## Contributors
-- **Hongqing Cao**
+- **[Hongqing Cao](https://www.github.com/Deuce-Cao)**
 - **Leila Dabbaghzadeh**
 - **Pengbo Ma**
 - **Zhengrong Yu**
