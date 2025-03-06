@@ -36,16 +36,9 @@ The project consists of two primary modules:
 - **Git for Version Control**
 
 ### **Project Repository Setup**
-1. **Initialize Git**
+1. **Git**
    ```sh
-   git init
-   git add .
-   git commit -m "Initial commit"
-   ```
-2. **Push to GitHub**
-   ```sh
-   git remote add origin https://github.com/Deuce-Cao/ColorSignaledRoboticCarNavigation.git
-   git push -u origin main
+   git clone https://github.com/Deuce-Cao/ColorSignaledRoboticCarNavigation.git
    ```
 
 ## File Structure
