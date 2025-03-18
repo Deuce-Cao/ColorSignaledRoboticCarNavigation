@@ -51,13 +51,32 @@ void setup()
     }
 
     sensor_t *s = esp_camera_sensor_get();
+    
     Serial.printf("Sensor PID: 0x%x\n", s->id.PID);
+    // all ov2640 camera settings
+    s->set_brightness(s, 1);                 // -2 to 2
+    s->set_contrast(s, 1);                   // -2 to 2
+    s->set_saturation(s, 2);                 // -2 to 2
+    s->set_special_effect(s, 0);             // 0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia
+    s->set_whitebal(s, 0);                   // 0 = disable , 1 = enable
+    s->set_awb_gain(s, 0);                   // 0 = disable , 1 = enable
+    s->set_wb_mode(s, 0);                    // 0 = Auto , 1 = Sunny , 2 = Cloudy, 3 = Office , 4 = Home
+    s->set_exposure_ctrl(s, 0);              // 0 = disable , 1 = enable
+    s->set_aec2(s, 0);                       // 0 = disable , 1 = enable
+    s->set_ae_level(s, -2);                  // -2 to 2
+    s->set_aec_value(s, 100);                // 0 to 1200
+    s->set_gain_ctrl(s, 0);                  // 0 = disable , 1 = enable
+    s->set_agc_gain(s, 0);                   // 0 to 30
+    s->set_gainceiling(s, (gainceiling_t)2); // 0 to 6
+    s->set_bpc(s, 0);                        // 0 = disable , 1 = enable
+    s->set_wpc(s, 1);                        // 0 = disable , 1 = enable
+    s->set_raw_gma(s, 1);                    // 0 = disable , 1 = enable
+    s->set_lenc(s, 1);                       // 0 = disable , 1 = enable
+    s->set_hmirror(s, 0);                    // 0 = disable , 1 = enable
+    s->set_vflip(s, 0);                      // 0 = disable , 1 = enable
+    s->set_dcw(s, 1);                        // 0 = disable , 1 = enable
+    s->set_colorbar(s, 0);                   // 0 = disable , 1 = enable
 
-    // Set color thresholds (calibrate these)
-    detector.setThresholds(
-        {150, 255, 0, 100, 0, 100, 50},
-        {0, 100, 150, 255, 0, 100, 50},
-        {0, 100, 0, 100, 150, 255, 50});
 }
 void loop()
 {
@@ -70,8 +89,6 @@ void loop()
 
     DetectedColor color = detector.detect(fb->buf, fb->width, fb->height);
 
-    RGB center_rgb = detector.getCenterPixelRGB(fb->buf, fb->width, fb->height);
-    Serial.printf("Center Pixel RGB: R=%d, G=%d, B=%d\n", center_rgb.r, center_rgb.g, center_rgb.b);
 
     if (color != DetectedColor::NONE)
     {

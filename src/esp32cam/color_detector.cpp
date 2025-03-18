@@ -3,23 +3,6 @@
 // Default thresholds (calibrate these)
 ColorDetector::ColorDetector()
 {
-    // Red: High R, low G/B
-    red_thresh = {150, 255, 0, 100, 0, 100, 50};
-
-    // Green: High G, low R/B
-    green_thresh = {0, 100, 150, 255, 0, 100, 50};
-
-    // Blue: High B, low R/G
-    blue_thresh = {0, 100, 0, 100, 150, 255, 50};
-}
-
-void ColorDetector::setThresholds(const ColorThreshold &red,
-                                  const ColorThreshold &green,
-                                  const ColorThreshold &blue)
-{
-    red_thresh = red;
-    green_thresh = green;
-    blue_thresh = blue;
 }
 
 RGB ColorDetector::getRGB565Components(uint16_t rgb565) const
@@ -33,25 +16,76 @@ RGB ColorDetector::getRGB565Components(uint16_t rgb565) const
     return rgb;
 }
 
-RGB ColorDetector::getCenterPixelRGB(const uint8_t *frame,
-                                     size_t width,
-                                     size_t height) const
+int ColorDetector::checkThreshold(const HSV &hsv) const
 {
-    const uint16_t *pixels = reinterpret_cast<const uint16_t *>(frame);
-    size_t center_x = width / 2;
-    size_t center_y = height / 2;
-    uint16_t center_pixel = pixels[center_y * width + center_x];
-    return getRGB565Components(center_pixel);
+    const float h = hsv.h;
+    const float s = hsv.s;
+    const float v = hsv.v;
+
+    // Check for black/white/gray
+    if (s <= 0.3 || v <= 0.3)
+    {
+        // Red
+        if (h >= 0 && h <= 40 || h >= 320 && h <= 360)
+            return 1;
+        // Green
+        else if (h >= 50 && h <= 150)
+            return 2;
+        // Blue
+        else if (h >= 160 && h <= 300)
+            return 3;
+    }
+    return 0;
 }
 
-bool ColorDetector::checkThreshold(uint8_t r,
-                                   uint8_t g,
-                                   uint8_t b,
-                                   const ColorThreshold &thresh) const
+// Helper function to convert RGB to HSV
+HSV ColorDetector::rgbToHsv(const RGB &rgb) const
 {
-    return (r >= thresh.min_red) && (r <= thresh.max_red) &&
-           (g >= thresh.min_green) && (g <= thresh.max_green) &&
-           (b >= thresh.min_blue) && (b <= thresh.max_blue);
+    // Normalize RGB values to [0, 1]
+    const float r = rgb.r / 255.0f;
+    const float g = rgb.g / 255.0f;
+    const float b = rgb.b / 255.0f;
+
+    // Find value and chroma
+    const float max = fmaxf(fmaxf(r, g), b);
+    const float min = fminf(fminf(r, g), b);
+    const float chroma = max - min;
+
+    HSV hsv;
+    hsv.v = max;
+
+    // Handle achromatic case (gray)
+    if (chroma < 1e-5f)
+    {
+        hsv.h = 0.0f;
+        hsv.s = 0.0f;
+        return hsv;
+    }
+
+    // Calculate saturation
+    hsv.s = chroma / max;
+
+    // Calculate hue
+    if (max == r)
+    {
+        hsv.h = 60.0f * fmodf((g - b) / chroma + 6.0f, 6.0f);
+    }
+    else if (max == g)
+    {
+        hsv.h = 60.0f * ((b - r) / chroma + 2.0f);
+    }
+    else
+    { // max == b
+        hsv.h = 60.0f * ((r - g) / chroma + 4.0f);
+    }
+
+    // Ensure hue is positive
+    if (hsv.h < 0.0f)
+    {
+        hsv.h += 360.0f;
+    }
+    Serial.printf("H: %.2f\n", hsv.h);
+    return hsv;
 }
 
 DetectedColor ColorDetector::detect(const uint8_t *frame,
@@ -60,6 +94,7 @@ DetectedColor ColorDetector::detect(const uint8_t *frame,
 {
     const uint16_t *pixels = reinterpret_cast<const uint16_t *>(frame);
     uint32_t red_count = 0, green_count = 0, blue_count = 0;
+
     uint32_t total_pixels = 0;
 
     // Calculate ROI boundaries
@@ -76,11 +111,15 @@ DetectedColor ColorDetector::detect(const uint8_t *frame,
             uint16_t pixel = pixels[y * width + x];
             RGB rgb = getRGB565Components(pixel);
 
-            if (checkThreshold(rgb.r, rgb.g, rgb.b, red_thresh))
+            // Convert RGB to HSV
+            HSV hsv = rgbToHsv(rgb);
+
+            // Check thresholds for each color
+            if (checkThreshold(hsv) == 1)
                 red_count++;
-            if (checkThreshold(rgb.r, rgb.g, rgb.b, green_thresh))
+            else if (checkThreshold(hsv) == 2)
                 green_count++;
-            if (checkThreshold(rgb.r, rgb.g, rgb.b, blue_thresh))
+            else if (checkThreshold(hsv) == 3)
                 blue_count++;
 
             total_pixels++;
@@ -95,26 +134,12 @@ DetectedColor ColorDetector::detect(const uint8_t *frame,
     Serial.printf("Red: %.2f%%, Green: %.2f%%, Blue: %.2f%%\n", red_percent, green_percent, blue_percent);
 
     // Determine dominant color
-    if (red_percent >= red_thresh.confidence &&
-        red_percent > green_percent &&
-        red_percent > blue_percent)
-    {
+    if (red_percent > 50 && red_percent > green_percent && red_percent > blue_percent)
         return DetectedColor::RED;
-    }
-
-    if (green_percent >= green_thresh.confidence &&
-        green_percent > red_percent &&
-        green_percent > blue_percent)
-    {
+    else if (green_percent > 50 && green_percent > red_percent && green_percent > blue_percent)
         return DetectedColor::GREEN;
-    }
-
-    if (blue_percent >= blue_thresh.confidence &&
-        blue_percent > red_percent &&
-        blue_percent > green_percent)
-    {
+    else if (blue_percent > 50 && blue_percent > red_percent && blue_percent > green_percent)
         return DetectedColor::BLUE;
-    }
 
     return DetectedColor::NONE;
 }
