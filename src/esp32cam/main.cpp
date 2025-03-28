@@ -1,42 +1,26 @@
 #include <Arduino.h>
 #include "camera_module.h"
 #include "color_detector.h"
-#include <Base64.h> // Arduino Base64 library
 
 #define TX_PIN 3
 #define RX_PIN 40
 
+ColorDetector detector;
+
 void sendImageToPC(camera_fb_t *fb)
 {
-    // Send header
-    Serial.write(0xAA);
-    Serial.write(0xBB);
+    // Send metadata
+    Serial.println("START");
+    Serial.println(fb->width);  // Image width
+    Serial.println(fb->height); // Image height
+    Serial.println(fb->len);    // Image length in bytes
 
-    // Send frame in chunks
-    size_t bytesSent = 0;
-    const size_t chunkSize = 512;
-    while (bytesSent < fb->len)
-    {
-        if (Serial.availableForWrite() >= chunkSize)
-        {
-            size_t toSend = min(chunkSize, fb->len - bytesSent);
-            Serial.write(fb->buf + bytesSent, toSend);
-            bytesSent += toSend;
-        }
-        delayMicroseconds(100);
-    }
+    // Send raw RGB565 data
+    Serial.write(fb->buf, fb->len);
 
-    // Send footer and checksum
-    uint8_t checksum = 0;
-    for (size_t i = 0; i < fb->len; i++)
-        checksum ^= fb->buf[i];
-    Serial.write(0xCC);
-    Serial.write(0xDD);
-    Serial.write(checksum);
-    Serial.println("Image sent");
+    // End marker
+    Serial.println("END");
 }
-
-ColorDetector detector;
 
 void setup()
 {
@@ -107,10 +91,7 @@ void setup()
     Serial.printf("Sensor PID: 0x%x\n", s->id.PID);
 
     // Set color thresholds (calibrate these)
-    detector.setThresholds(
-        {150, 255, 0, 100, 0, 100, 50},
-        {0, 100, 150, 255, 0, 100, 50},
-        {0, 100, 0, 100, 150, 255, 50});
+    detector.initialize();
 }
 void loop()
 {
@@ -120,34 +101,33 @@ void loop()
         Serial.println("Failed to capture frame");
         return;
     }
-    sendImageToPC(fb);
-    
-    // RGB avg_rgb = detector.getAverageRGB(fb->buf, fb->width, fb->height);
-    // Serial.printf("R=%d, G=%d, B=%d\n", avg_rgb.r, avg_rgb.g, avg_rgb.b);
-    // DetectedColor color = detector.detect(fb->buf, fb->width, fb->height);
+    //sendImageToPC(fb);
+    //RGB avg_rgb = detector.getAverageRGB(fb->buf, fb->width, fb->height);
+    //Serial.printf("R=%d, G=%d, B=%d\n", avg_rgb.r, avg_rgb.g, avg_rgb.b);
+    DetectedColor color = detector.detect(fb->buf, fb->width, fb->height);
 
-    // // RGB center_rgb = detector.getCenterPixelRGB(fb->buf, fb->width, fb->height);
-    // // Serial.printf("Center Pixel RGB: R=%d, G=%d, B=%d\n", center_rgb.r, center_rgb.g, center_rgb.b);
+    // RGB center_rgb = detector.getCenterPixelRGB(fb->buf, fb->width, fb->height);
+    // Serial.printf("Center Pixel RGB: R=%d, G=%d, B=%d\n", center_rgb.r, center_rgb.g, center_rgb.b);
 
-    // if (color != DetectedColor::NONE)
-    // {
-    //     const char *color_str = "";
-    //     switch (color)
-    //     {
-    //     case DetectedColor::RED:
-    //         color_str = "RED";
-    //         break;
-    //     case DetectedColor::GREEN:
-    //         color_str = "GREEN";
-    //         break;
-    //     case DetectedColor::BLUE:
-    //         color_str = "BLUE";
-    //         break;
-    //     }
-    //     Serial2.println(color_str);
-    //     Serial.printf("Detected: %s\n", color_str);
-    // }
+    if (color != DetectedColor::NONE)
+    {
+        const char *color_str = "";
+        switch (color)
+        {
+        case DetectedColor::RED:
+            color_str = "RED";
+            break;
+        case DetectedColor::GREEN:
+            color_str = "GREEN";
+            break;
+        case DetectedColor::BLUE:
+            color_str = "BLUE";
+            break;
+        }
+        Serial2.println(color_str);
+        Serial.printf("Detected: %s\n", color_str);
+    }
 
-    esp_camera_fb_return(fb);
-    delay(5000); // 3s
+        esp_camera_fb_return(fb);
+    delay(3000); // 3s
 }
