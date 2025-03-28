@@ -42,6 +42,8 @@ public:
     RGB getCenterPixelRGB(const uint8_t *frame,
                           size_t width,
                           size_t height) const;
+    // Function to get average RGB values of the image
+    RGB getAverageRGB(const uint8_t *frame, size_t width, size_t height) const;
 
 private:
     ColorThreshold red_thresh;
@@ -57,8 +59,8 @@ private:
                         const ColorThreshold &thresh) const;
 
     // Analysis region (center 50% of image)
-    static constexpr float ROI_X_START = 0.25f;
-    static constexpr float ROI_X_END = 0.75f;
-    static constexpr float ROI_Y_START = 0.25f;
-    static constexpr float ROI_Y_END = 0.75f;
+    static constexpr float ROI_X_START = 0.4f;
+    static constexpr float ROI_X_END = 0.6f;
+    static constexpr float ROI_Y_START = 0.4f;
+    static constexpr float ROI_Y_END = 0.6f;
 };
