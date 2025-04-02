@@ -7,7 +7,7 @@ import colorsys
 #df = pd.read_csv('captured_frames/frame_20250328_135552_167830.csv')
 #df = pd.read_csv('captured_frames/frame_20250328_135557_317341.csv')
 #df = pd.read_csv('captured_frames/frame_20250328_135607_617282.csv')
-#df = pd.read_csv('captured_frames/frame_20250328_135602_469441.csv')
+df = pd.read_csv('captured_frames/frame_20250328_135602_469441.csv')
 
 # QQVGA dimensions
 width, height = 160, 120
@@ -25,10 +25,10 @@ center_pixels = pixels[y_start:y_end, x_start:x_end].reshape(-1, 3)
 # Convert the center pixels to a DataFrame
 center_df = pd.DataFrame(center_pixels, columns=['R', 'G', 'B'])
 
-# print the count for R value > 200, count for G > 100, count for B > 200
-print("Count of R > 200:", len(center_df[center_df['R'] > 200]))
-print("Count of G > 150:", len(center_df[center_df['G'] > 150]))
-print("Count of B > 200:", len(center_df[center_df['B'] > 200]))
+# # print the count for R value > 200, count for G > 100, count for B > 200
+# print("Count of R > 200:", len(center_df[center_df['R'] > 200]))
+# print("Count of G > 150:", len(center_df[center_df['G'] > 150]))
+# print("Count of B > 200:", len(center_df[center_df['B'] > 200]))
 
 # # Create histograms
 # plt.figure(figsize=(12, 6))
@@ -61,6 +61,10 @@ def rgb_to_hsv(row):
 
 # Convert to HSV
 center_df[['Hue', 'Sat', 'Val']] = center_df.apply(rgb_to_hsv, axis=1, result_type='expand')
+
+# remove pixels with s < 0.5 or v < 0.5
+center_df = center_df[(center_df['Sat'] > 0.4) & (center_df['Val'] > 0.4)]
+print("Count of pixels after removing low saturation and value:", len(center_df))
 
 #print count for (Hue < 30 + Hue > 330), count for (120 < Hue <190), count for (200 < Hue < 240) 
 print("Count of Hue < 30 or Hue > 330:", len(center_df[(center_df['Hue'] < 30) | (center_df['Hue'] > 330)]))

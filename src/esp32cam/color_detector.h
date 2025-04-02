@@ -23,9 +23,9 @@ public:
     void initialize();
     // Main detection function
     DetectedColor detect(const uint8_t *frame,
+                         size_t length,
                          size_t width,
                          size_t height);
-
 
 private:
     // RGB565 conversion utilities

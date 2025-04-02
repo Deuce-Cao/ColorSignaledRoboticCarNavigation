@@ -102,12 +102,8 @@ void loop()
         return;
     }
     //sendImageToPC(fb);
-    //RGB avg_rgb = detector.getAverageRGB(fb->buf, fb->width, fb->height);
-    //Serial.printf("R=%d, G=%d, B=%d\n", avg_rgb.r, avg_rgb.g, avg_rgb.b);
-    DetectedColor color = detector.detect(fb->buf, fb->width, fb->height);
 
-    // RGB center_rgb = detector.getCenterPixelRGB(fb->buf, fb->width, fb->height);
-    // Serial.printf("Center Pixel RGB: R=%d, G=%d, B=%d\n", center_rgb.r, center_rgb.g, center_rgb.b);
+    DetectedColor color = detector.detect(fb->buf, fb->len, fb->width, fb->height);
 
     if (color != DetectedColor::NONE)
     {
@@ -125,9 +121,10 @@ void loop()
             break;
         }
         Serial2.println(color_str);
-        Serial.printf("Detected: %s\n", color_str);
+        Serial2.flush(); // Ensure the data is sent immediately
+        Serial.printf("Detected color: %s\n", color_str);
     }
 
         esp_camera_fb_return(fb);
-    delay(3000); // 3s
+    delay(1000); // 3s
 }
