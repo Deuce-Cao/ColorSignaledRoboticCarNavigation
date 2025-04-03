@@ -60,7 +60,7 @@ ColorDetector::detect(const uint8_t *frame,
     size_t red_count = 0, green_count = 0, blue_count = 0;
 
     int valid_count = 0; // Count of valid pixels in the ROI
-    // int total_H = 0;     // Total hue value
+    int total_H = 0;     // Total hue value
 
     // Serial.println("RAW_START");
     // for (size_t i = 0; i < length; i++)
@@ -95,13 +95,13 @@ ColorDetector::detect(const uint8_t *frame,
             if (hsv.S > 0.3f && hsv.V > 0.3f) // Check saturation and value
             {
                 valid_count++;
-                // total_H += hsv.H; // Accumulate hue value
+                total_H += hsv.H; // Accumulate hue value
                 // Check color ranges
-                if (hsv.H < 30 || hsv.H > 330) // Red range
+                if (hsv.H < 20 || hsv.H > 330) // Red range
                     red_count++;
                 if (hsv.H > 90 && hsv.H < 190) // Green range
                     green_count++;
-                if (hsv.H > 220 && hsv.H < 270) // Blue range
+                if (hsv.H > 220 && hsv.H < 260) // Blue range
                     blue_count++;
             }
         }
@@ -110,19 +110,19 @@ ColorDetector::detect(const uint8_t *frame,
     // Serial.printf("Total Pixels Sent: %zu\n", pixel_count);
     // Serial.println("");
     // Calculate average hue
-    // if (valid_count > 0)
-    // {
-    //     int avg_H = total_H / valid_count;
-    //     Serial.printf("Average Hue: %d\n", avg_H);
-    // }
+    if (valid_count > 0)
+    {
+        int avg_H = total_H / valid_count;
+        Serial.printf("Average Hue: %d\n", avg_H);
+    }
     Serial.printf("Valid pixels in ROI: %d\n", valid_count);
     Serial.printf("Red: %zu, Green: %zu, Blue: %zu\n", red_count, green_count, blue_count);
     // Check counts against thresholds
     if (valid_count < 2000)
         return DetectedColor::NONE; // No valid pixels in ROI
-    if (red_count > 2000)
+    if (red_count > 3000)
         return DetectedColor::RED;
-    else if (blue_count > 2000)
+    else if (blue_count > 3000)
         return DetectedColor::BLUE;
     else if (green_count > 2000)
         return DetectedColor::GREEN;

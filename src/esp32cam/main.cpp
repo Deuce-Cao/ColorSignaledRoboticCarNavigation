@@ -2,8 +2,8 @@
 #include "camera_module.h"
 #include "color_detector.h"
 
-#define TX_PIN 3
-#define RX_PIN 40
+#define TX_PIN 40
+#define RX_PIN 3
 
 ColorDetector detector;
 
@@ -120,11 +120,12 @@ void loop()
             color_str = "BLUE";
             break;
         }
-        Serial2.println(color_str);
+        // send the color with timestamp to Serial2 as {RED,time}
+        Serial2.printf("{%s,%lu}\n", color_str, millis());
         Serial2.flush(); // Ensure the data is sent immediately
         Serial.printf("Detected color: %s\n", color_str);
     }
 
         esp_camera_fb_return(fb);
-    delay(1000); // 3s
+    delay(1000); // 1s
 }
