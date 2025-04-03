@@ -72,6 +72,7 @@ enum SmartRobotCarFunctionalModel
   Rocker_mode,
   TraceBased_mode, /*Line Tracking Mode*/
   Sequence_mode,   /*Sequence Mode*/
+  Test_mode,
 };
 
 enum SystemCondition
@@ -304,6 +305,18 @@ static void ApplicationFunctionSet_SmartRobotCarMotionControl(SmartRobotCarMotio
     break;
   }
 }
+void ApplicationFunctionSet::turnAround(void)
+{
+  if (Application_SmartRobotCarxxx0.Functional_Mode == Test_mode)
+  {
+    Serial.println("Test mode: Turning around...");
+    ApplicationFunctionSet_SmartRobotCarMotionControl(Left, 100);
+    delay(650);                                                    // Increase the delay time for each iteration
+    ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0); // Stop the car
+    delay(1000);
+  }
+}
+
 /*
  Robot car update sensors' data:Partial update (selective update)
 */
@@ -698,7 +711,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Standby(void)
     if (Serial.available() > 0)
     {
       Serial.print("Last Received Time: ");
-      Serial.println(lastReceivedMillis); // Print the last received time
+      Serial.println(lastReceivedMillis);                   // Print the last received time
       String receivedString = Serial.readStringUntil('\n'); // Read until newline
       receivedString.trim();                                // Remove any leading/trailing whitespace
       Serial.println(receivedString);                       // Print the received string
@@ -708,7 +721,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Standby(void)
       unsigned long timepassed = receivedMillis - lastReceivedMillis;
       Serial.print("Time passed: ");
       Serial.println(timepassed); // Print the last received time
-      if (timepassed > 2000) // Compare the millisecond values
+      if (timepassed > 2000)      // Compare the millisecond values
       {
         // Process the received string
         if (receivedString.startsWith("{RED"))
@@ -766,16 +779,18 @@ void ApplicationFunctionSet::PerformSequence(void)
       {
         Serial.println("Condition 3: No turning...");
       }
-      delay(1000);                                                   // Wait for 1 second
+      delay(650);                                                    // Wait for 1 second
       ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0); // Stop the car
+      delay(500);
       sequenceStep++;
       break;
 
     case 1: // Step 2: Move a small distance
       Serial.println("Step 2: Moving a small distance...");
       ApplicationFunctionSet_SmartRobotCarMotionControl(Forward, 100); // Move forward
-      delay(2000);                                                     // Wait for 2 seconds
+      delay(500);                                                      // Wait for 2 seconds
       ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0);   // Stop the car
+      delay(500);
       sequenceStep++;
       break;
 
@@ -807,8 +822,9 @@ void ApplicationFunctionSet::PerformSequence(void)
     case 4: // Step 5: Turn 180 degrees
       Serial.println("Step 5: Turning 180 degrees...");
       ApplicationFunctionSet_SmartRobotCarMotionControl(Left, 100);  // Turn left
-      delay(2000);                                                   // Wait for 2 seconds
+      delay(1250);                                                   // Wait for 2 seconds
       ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0); // Stop the car
+      delay(500);
       destinationReached = false;
       sequenceStep++;
       break;
@@ -830,8 +846,15 @@ void ApplicationFunctionSet::PerformSequence(void)
     case 6: // Step 7: Move forward a small distance
       Serial.println("Step 7: Moving forward a small distance...");
       ApplicationFunctionSet_SmartRobotCarMotionControl(Forward, 100); // Move forward
-      delay(1500);                                                     // Wait for 1.5 seconds
-      ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0);   // Stop the car
+      if (Application_SmartRobotCarxxx0.SystemCondition == BLUE)
+      {
+        delay(750);
+      }
+      else
+      {
+        delay(600);
+      }                                                              // Wait for 1.5 seconds
+      ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0); // Stop the car
       sequenceStep++;
       break;
 
@@ -839,20 +862,21 @@ void ApplicationFunctionSet::PerformSequence(void)
       Serial.println("Step 8: Turning to initial direction...");
       if (Application_SmartRobotCarxxx0.SystemCondition == RED)
       {
-        ApplicationFunctionSet_SmartRobotCarMotionControl(Right, 100); // Turn right
-        delay(1000);
+        ApplicationFunctionSet_SmartRobotCarMotionControl(Left, 100); // Turn right
+        delay(650);
       }
       else if (Application_SmartRobotCarxxx0.SystemCondition == GREEN)
       {
-        ApplicationFunctionSet_SmartRobotCarMotionControl(Left, 100); // Turn left
-        delay(1000);
+        ApplicationFunctionSet_SmartRobotCarMotionControl(Right, 100); // Turn left
+        delay(650);
       }
       else if (Application_SmartRobotCarxxx0.SystemCondition == BLUE)
       {
         ApplicationFunctionSet_SmartRobotCarMotionControl(Left, 100); // Turn 180
-        delay(2000);
+        delay(1250);
       }
       ApplicationFunctionSet_SmartRobotCarMotionControl(stop_it, 0); // Stop the car
+      delay(500);
       destinationReached = false;
       sequenceStep++;
       break;
@@ -935,6 +959,10 @@ void ApplicationFunctionSet::ApplicationFunctionSet_IRrecv(void)
       break;
     case /* constant-expression */ 6:
       /* code */ Application_SmartRobotCarxxx0.Functional_Mode = TraceBased_mode;
+      break;
+
+    case /* constant-expression */ 7:
+      /* code */ Application_SmartRobotCarxxx0.Functional_Mode = Test_mode;
       break;
     case /* constant-expression */ 9:
       /* code */ if (Application_SmartRobotCarxxx0.Functional_Mode == TraceBased_mode) // Adjust the threshold of the line tracking module to adapt the actual environment

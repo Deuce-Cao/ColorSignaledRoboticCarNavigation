@@ -26,6 +26,7 @@ public:
   void ApplicationFunctionSet_SensorDataUpdate(void);   //Sensor Data Update
   void PerformSequence(void); //Perform Sequence
   void ApplicationFunctionSet_IRrecv(void);
+  void turnAround(void); // Test function for turning around
 
 private:
   /*Sensor Raw Value*/

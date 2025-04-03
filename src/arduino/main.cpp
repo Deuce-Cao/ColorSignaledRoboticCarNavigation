@@ -28,5 +28,6 @@ void loop()
   Application_FunctionSet.ApplicationFunctionSet_Tracking();
   Application_FunctionSet.ApplicationFunctionSet_Standby();
   Application_FunctionSet.PerformSequence();
+  Application_FunctionSet.turnAround();
   Application_FunctionSet.ApplicationFunctionSet_IRrecv();
 }
