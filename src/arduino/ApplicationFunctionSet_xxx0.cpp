@@ -68,11 +68,11 @@ enum SmartRobotCarMotionControl
 /*Mode Control List*/
 enum SmartRobotCarFunctionalModel
 {
-  Standby_mode, /*Standby Mode*/
-  Rocker_mode,
-  TraceBased_mode, /*Line Tracking Mode*/
-  Sequence_mode,   /*Sequence Mode*/
-  Test_mode,
+  Standby_mode,     /*Standby Mode*/
+  Rocker_mode,      /*Rocker Mode*/
+  TraceBased_mode,  /*Line Tracking Mode*/
+  Sequence_mode,    /*Sequence Mode*/
+  Test_mode,        /*Test Mode*/
 };
 
 enum SystemCondition

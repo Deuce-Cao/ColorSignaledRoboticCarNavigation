@@ -2,6 +2,30 @@
 #include <Arduino.H>
 #include <ESP_Color.H>
 
+struct Thresholds
+{
+    // HSV thresholds
+    float saturation = 0.3f; // Saturation threshold
+    float value = 0.3f;      // Value threshold
+
+    // Hue ranges for specific colors
+    int redMin = 330;    // Minimum hue for red
+    int redMax = 20;     // Maximum hue for red
+    int greenMin = 90;   // Minimum hue for green
+    int greenMax = 190;  // Maximum hue for green
+    int blueMin = 220;   // Minimum hue for blue
+    int blueMax = 260;   // Maximum hue for blue
+
+    // Pixel count thresholds
+    int validPixelCount = 2000; // Minimum valid pixels in ROI
+    int redPixelCount = 3000;   // Minimum red pixels for detection
+    int greenPixelCount = 2000; // Minimum green pixels for detection
+    int bluePixelCount = 3000;  // Minimum blue pixels for detection
+};
+
+// Create a global instance of the struct
+Thresholds thresholds;
+
 // Default thresholds (calibrate these)
 ColorDetector::ColorDetector()
 {
@@ -92,16 +116,16 @@ ColorDetector::detect(const uint8_t *frame,
             // pixel_count++;
             auto hsv = color.ToHsv();
             hsv.H = hsv.H * 360;              // Convert to 0-360 range
-            if (hsv.S > 0.3f && hsv.V > 0.3f) // Check saturation and value
+            if (hsv.S > thresholds.saturation && hsv.V > thresholds.value) // Check saturation and value
             {
                 valid_count++;
                 total_H += hsv.H; // Accumulate hue value
                 // Check color ranges
-                if (hsv.H < 20 || hsv.H > 330) // Red range
+                if (hsv.H < thresholds.redMax || hsv.H > thresholds.redMin) // Red range
                     red_count++;
-                if (hsv.H > 90 && hsv.H < 190) // Green range
+                if (hsv.H > thresholds.greenMin && hsv.H < thresholds.greenMax) // Green range
                     green_count++;
-                if (hsv.H > 220 && hsv.H < 260) // Blue range
+                if (hsv.H > thresholds.blueMin && hsv.H < thresholds.blueMax) // Blue range
                     blue_count++;
             }
         }
@@ -118,13 +142,13 @@ ColorDetector::detect(const uint8_t *frame,
     Serial.printf("Valid pixels in ROI: %d\n", valid_count);
     Serial.printf("Red: %zu, Green: %zu, Blue: %zu\n", red_count, green_count, blue_count);
     // Check counts against thresholds
-    if (valid_count < 2000)
+    if (valid_count < thresholds.validPixelCount)
         return DetectedColor::NONE; // No valid pixels in ROI
-    if (red_count > 3000)
+    if (red_count > thresholds.redPixelCount)
         return DetectedColor::RED;
-    else if (blue_count > 3000)
+    else if (blue_count > thresholds.bluePixelCount)
         return DetectedColor::BLUE;
-    else if (green_count > 2000)
+    else if (green_count > thresholds.greenPixelCount)
         return DetectedColor::GREEN;
     return DetectedColor::NONE;
 }
