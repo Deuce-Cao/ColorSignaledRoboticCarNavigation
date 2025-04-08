@@ -40,8 +40,16 @@ The project consists of two primary modules:
    ```sh
    git clone https://github.com/Deuce-Cao/ColorSignaledRoboticCarNavigation.git
    ```
+2. Install [PlatformIO extension](https://platformio.org/install/ide?install=vscode). 
+3. Modify [platformio.ini](/platformio.ini) to match the COM ports in your environment. 
+4. **Upload**
+   ```sh
+   pio run -e uno -t upload
+   pio run -e esp32cam -t upload
+   ```
 
 ## File Structure
+The code uploaded to the UNO and ESP32 boards are under src/, using .cpp instead of .ino since we are using PlatformIO IDE instead of Arduino IDE. 
 ```
 ColorSignaledRoboticCarNavigation/
 ├── README.md
