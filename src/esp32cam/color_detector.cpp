@@ -104,7 +104,8 @@ ColorDetector::detect(const uint8_t *frame,
     {
         for (size_t x = ROI_X_START * width; x < ROI_X_END * width; x++)
         {
-            uint16_t pixel = (frame[(y * width + x) * 2] << 8) | frame[(y * width + x) * 2 + 1];
+            // Extract pixel data from the frame buffer
+            uint16_t pixel = (frame[(y * width + x) * 2] << 8) | frame[(y * width + x) * 2 + 1]; // RGB565 format
             // uint8_t r = ((pixel >> 11) & 0x1F) * 255 / 31;
             // uint8_t g = ((pixel >> 5) & 0x3F) * 255 / 63;
             // uint8_t b = (pixel & 0x1F) * 255 / 31;

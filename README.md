@@ -48,14 +48,37 @@ ColorSignaledRoboticCarNavigation/
 ├── docs/
 │   └── Advanced Robotics Proposal.docx
 ├── lib/
-│   └── README.md
+│   ├── ESP-Color-main.zip
+│   ├── IRremote.zip
+│   ├── NewPing.zip
+│   └── pitches.zip
 ├── src/
-│   ├── Arduino/
-│   │   └── main.ino
-│   └── ESP32_CAM/
-│       └── main.cpp
+│   ├── arduino/
+│   │   ├── main.cpp
+│   │   ├── main.hex
+│   │   ├── ApplicationFunctionSet_xxx0.cpp
+│   │   ├── ApplicationFunctionSet_xxx0.h
+│   │   ├── ArduinoJson-v6.11.1.h
+│   │   ├── DeviceDriverSet_xxx0.cpp
+│   │   ├── DeviceDriverSet_xxx0.h
+│   │   ├── I2Cdev.cpp
+│   │   ├── I2Cdev.h
+│   │   ├── IRremote.cpp
+│   │   ├── IRremote.h
+│   │   ├── IRremoteInt.h
+│   │   ├── MPU6050_getdata.cpp
+│   │   ├── MPU6050_getdata.h
+│   │   ├── MPU6050.cpp
+│   │   └── MPU6050.h
+│   └── esp32cam/
+│       ├── main.cpp
+│       ├── camera_module.h
+│       ├── color_detector.cpp
+│       └── color_detector.h
 └── test/
-    └── README.md
+    ├── compare.py
+    ├── compareRaw.py
+    └── getpic.py
 ```
 
 ## Risks & Challenges
