@@ -107,3 +107,7 @@ ColorSignaledRoboticCarNavigation/
 ---
 This project is part of the **SEP 780 - Advanced Robotics and Automation** course under the guidance of **Dr. Richard Ma**.
 
+## References
+https://github.com/elegooofficial/ELEGOO-Smart-Robot-Car-Kit-V4.0
+https://github.com/luisllamasbinaburo/ESP-Color
+https://randomnerdtutorials.com/esp32-cam-ov2640-camera-settings/
